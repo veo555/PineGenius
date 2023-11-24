@@ -34,8 +34,6 @@ Follow these steps to unleash the power of the PineScript Language Model:
 
 ## Support
 
-For questions, issues, or feedback, feel free to reach out via [contact information].
-
 Thank you for considering the PineScript Language Model. May it elevate your coding and trading endeavors.
 
 DONATE: https://paypal.me/mattbishopfx?country.x=US&locale.x=en_US
