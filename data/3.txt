@@ -1,0 +1,133 @@
+Dual-Supertrend with MACD - Strategy [presentTrading]
+
+## Introduction and How it is Different
+
+The Dual-Supertrend with MACD strategy offers an amalgamation of two trend-following indicators (Supertrend 1 & 2) with a momentum oscillator (MACD). It aims to provide a cohesive and systematic approach to trading, eliminating the need for discretionary decision-making.
+
+Key advantages over traditional single-indicator strategies:
+
+- Dual Supertrend Validation: Utilizes two Supertrend indicators with different ATR periods and factors to confirm the trend direction. This double-check mechanism minimizes false signals.
+- Momentum Confirmation: The MACD histogram acts as a momentum filter, confirming entries and exits, thus adding an extra layer of validation.
+- Objective Entry and Exit: The strategy generates buy and sell signals based on a combination of trend direction and momentum, leaving no room for subjective interpretation.
+- Automated Trade Management: The strategy includes built-in settings for commission, slippage, and initial capital, automating the trade execution process.
+- Adaptability: The strategy allows for easy customization of all its parameters, adapting to a trader's specific needs and varying market conditions.
+
+BTCUSD 8hr chart Long Condition
+snapshot
+
+BTCUSD 6hr chart Long Short Condition
+snapshot
+
+## Strategy, How it Works
+
+The strategy operates on a set of clearly defined rules, primarily focusing on the trend direction confirmed by the Dual-Supertrend and the momentum as indicated by the MACD histogram.
+
+### Entry Rules
+
+- Long Entry: When both Supertrend indicators are bullish and the MACD histogram is above zero.
+- Short Entry: When both Supertrend indicators are bearish and the MACD histogram is below zero.
+
+### Exit Rules
+
+- Exit long positions when either of the Supertrends turn bearish or the MACD histogram drops below zero.
+- Exit short positions when either of the Supertrends turn bullish or the MACD histogram rises above zero.
+
+### Trade Management
+
+- The strategy uses a fixed commission rate and slippage in its calculations.
+- Automated risk management features are integrated to avoid overexposure.
+
+## Trade Direction
+
+The strategy allows for trading in both bullish and bearish markets. Users can select their preferred trading direction ("long", "short", or "both") to align with their market outlook and trading objectives.
+
+## Usage
+
+- The strategy is best applied on timeframes where the trend is evident.
+- Users can modify the ATR periods, factors for Supertrends, and MACD settings to suit their trading needs.
+
+## Default Settings
+
+- ATR Period for Supertrend 1: 10
+- Factor for Supertrend 1: 3.0
+- ATR Period for Supertrend 2: 20
+- Factor for Supertrend 2: 5.0
+- MACD Fast Length: 12
+- MACD Slow Length: 26
+- MACD Signal Smoothing: 9
+- Commission: 0.1%
+- Slippage: 1 point
+- Trading Direction: Both
+
+
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © PresentTrading
+
+//@version=5
+// Define the strategy settings
+strategy("Dual-Supertrend with MACD - Strategy [presentTrading]", overlay=true, precision=3, default_qty_type=strategy.cash, 
+ commission_value= 0.1, commission_type=strategy.commission.percent, slippage= 1, 
+  currency=currency.USD, default_qty_type = strategy.percent_of_equity, default_qty_value = 10, initial_capital= 10000)
+
+// Trading Direction Dropdown
+tradeDirection = input.string("both", "Trading Direction", options=["long", "short", "both"])
+
+// MACD Inputs
+fast_length = input(12, "Fast Length")
+slow_length = input(26, "Slow Length")
+signal_length = input(9, "Signal Smoothing")
+sma_source = input.string("EMA", "Oscillator MA Type", options=["SMA", "EMA"])
+sma_signal = input.string("EMA", "Signal Line MA Type", options=["SMA", "EMA"])
+
+
+// MACD Calculation
+fast_ma = sma_source == "SMA" ? ta.sma(close, fast_length) : ta.ema(close, fast_length)
+slow_ma = sma_source == "SMA" ? ta.sma(close, slow_length) : ta.ema(close, slow_length)
+macd = fast_ma - slow_ma
+signal = sma_signal == "SMA" ? ta.sma(macd, signal_length) : ta.ema(macd, signal_length)
+hist = macd - signal
+
+// Input Parameters for Supertrend 1
+atrPeriod1 = input(10, "ATR Length for Supertrend 1")
+factor1 = input.float(3.0, "Factor for Supertrend 1", step=0.01)
+
+// Supertrend Calculation for 1
+[supertrend1, direction1] = ta.supertrend(factor1, atrPeriod1)
+
+// Input Parameters for Supertrend 2
+atrPeriod2 = input(20, "ATR Length for Supertrend 2")
+factor2 = input.float(5.0, "Factor for Supertrend 2", step=0.01)
+
+// Supertrend Calculation for 2
+[supertrend2, direction2] = ta.supertrend(factor2, atrPeriod2)
+
+// Combined Conditions
+isBullish = direction1 < 0 and direction2 < 0 and hist > 0
+isBearish = direction1 > 0 and direction2 > 0 and hist < 0
+exitLong = direction1 > 0 or direction2 > 0 or hist < 0
+exitShort = direction1 < 0 or direction2 < 0 or hist > 0
+
+// Strategy Entry and Exit based on Trading Direction
+if (tradeDirection == "both" or tradeDirection == "long")
+    strategy.entry("Buy", strategy.long, when=isBullish)
+    strategy.close("Buy", when=exitLong)
+
+if (tradeDirection == "both" or tradeDirection == "short")
+    strategy.entry("Sell", strategy.short, when=isBearish)
+    strategy.close("Sell", when=exitShort)
+
+bodyMiddle1 = plot((open + close) / 2, display=display.none)
+upTrend1 = plot(direction1 < 0 ? supertrend1 : na, "Up Trend", color = color.green, style=plot.style_linebr)
+downTrend1 = plot(direction1 < 0? na : supertrend1, "Down Trend", color = color.red, style=plot.style_linebr)
+
+fill(bodyMiddle1, upTrend1, color.new(color.green, 90), fillgaps=false)
+fill(bodyMiddle1, downTrend1, color.new(color.red, 90), fillgaps=false)
+
+bodyMiddle2 = plot((open + close) / 2, display=display.none)
+upTrend2 = plot(direction2 < 0 ? supertrend2 : na, "Up Trend", color = color.green, style=plot.style_linebr)
+downTrend2 = plot(direction2 < 0? na : supertrend2, "Down Trend", color = color.red, style=plot.style_linebr)
+
+fill(bodyMiddle2, upTrend2, color.new(color.green, 90), fillgaps=false)
+fill(bodyMiddle2, downTrend2, color.new(color.red, 90), fillgaps=false)
+
+

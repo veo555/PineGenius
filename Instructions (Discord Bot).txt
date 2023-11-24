@@ -1,0 +1,26 @@
+**Editing Source Code For Personal Use**
+
+Visual Code Studio
+OpenAI API Key
+Discord Token
+Python
+
+**Running Program**
+
+1. Locate program file directiory 
+2. Right-click and 'Copy Path'
+3. Use Windows Key and search for 'cmd'
+4. Type "cd 'Paste Path' then hit Enter
+5. Last type 'python sudogpt.py'
+
+**Links To Programs Needed**
+
+Visual Code Studio : https://code.visualstudio.com/download
+OpenAI Developer Access : https://www.platform.openai.com
+Python Latest Version : https://www.python.org/downloads/
+
+**Support Contact**
+
+Email:
+WhatsApp:
+Discord:
